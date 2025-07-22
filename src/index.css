@@ -448,3 +448,160 @@ All colors MUST be HSL.
 .animate-fade-in {
   animation: fade-in 0.6s ease-out;
 }
+
+/* Realistic Candle Flame Animation */
+.candle-flame {
+  position: relative;
+  width: 12px;
+  height: 30px;
+}
+
+.flame-core {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 24px;
+  background: linear-gradient(to top, 
+    hsl(15 100% 50%), 
+    hsl(30 100% 60%), 
+    hsl(45 100% 70%), 
+    hsl(60 100% 80%)
+  );
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: flame-flicker 0.5s ease-in-out infinite alternate;
+}
+
+.flame-inner {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(to top, 
+    hsl(30 100% 60%), 
+    hsl(45 100% 70%), 
+    hsl(60 100% 80%), 
+    hsl(60 100% 90%)
+  );
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: flame-inner-flicker 0.3s ease-in-out infinite alternate;
+}
+
+.flame-glow {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 32px;
+  background: radial-gradient(ellipse at center, 
+    hsl(45 100% 70% / 0.4), 
+    hsl(30 100% 60% / 0.2), 
+    transparent
+  );
+  border-radius: 50%;
+  animation: flame-glow-pulse 1s ease-in-out infinite;
+}
+
+.flame-particles {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: hsl(60 100% 80%);
+  border-radius: 50%;
+  animation: particle-float 2s ease-in-out infinite;
+}
+
+.particle:nth-child(1) {
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.particle:nth-child(2) {
+  left: 50%;
+  animation-delay: 0.7s;
+}
+
+.particle:nth-child(3) {
+  right: 20%;
+  animation-delay: 1.4s;
+}
+
+@keyframes flame-flicker {
+  0% {
+    transform: translateX(-50%) rotate(-1deg) scale(1);
+    filter: brightness(1);
+  }
+  25% {
+    transform: translateX(-50%) rotate(1deg) scale(1.05);
+    filter: brightness(1.1);
+  }
+  50% {
+    transform: translateX(-50%) rotate(-0.5deg) scale(0.98);
+    filter: brightness(0.9);
+  }
+  75% {
+    transform: translateX(-50%) rotate(0.8deg) scale(1.02);
+    filter: brightness(1.05);
+  }
+  100% {
+    transform: translateX(-50%) rotate(-0.3deg) scale(1.01);
+    filter: brightness(1);
+  }
+}
+
+@keyframes flame-inner-flicker {
+  0% {
+    transform: translateX(-50%) scale(1) rotate(0deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.1) rotate(1deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(0.9) rotate(-1deg);
+    opacity: 0.9;
+  }
+}
+
+@keyframes flame-glow-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+@keyframes particle-float {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-15px) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-25px) scale(0);
+  }

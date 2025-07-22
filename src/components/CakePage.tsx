@@ -12,16 +12,94 @@ const CakePage = ({ onNext }: CakePageProps) => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showNextButton, setShowNextButton] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [playingMusic, setPlayingMusic] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const microphoneRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // Happy Birthday melody using Web Audio API
+  const playHappyBirthdayMelody = async () => {
+    if (playingMusic) return;
+    setPlayingMusic(true);
+    
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Happy Birthday melody notes (in Hz)
+      const notes = {
+        C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, 
+        G4: 392.00, A4: 440.00, B4: 493.88, C5: 523.25
+      };
+      
+      // Happy Birthday melody sequence
+      const melody = [
+        { note: notes.C4, duration: 0.3 },
+        { note: notes.C4, duration: 0.3 },
+        { note: notes.D4, duration: 0.6 },
+        { note: notes.C4, duration: 0.6 },
+        { note: notes.F4, duration: 0.6 },
+        { note: notes.E4, duration: 1.2 },
+        
+        { note: notes.C4, duration: 0.3 },
+        { note: notes.C4, duration: 0.3 },
+        { note: notes.D4, duration: 0.6 },
+        { note: notes.C4, duration: 0.6 },
+        { note: notes.G4, duration: 0.6 },
+        { note: notes.F4, duration: 1.2 },
+        
+        { note: notes.C4, duration: 0.3 },
+        { note: notes.C4, duration: 0.3 },
+        { note: notes.C5, duration: 0.6 },
+        { note: notes.A4, duration: 0.6 },
+        { note: notes.F4, duration: 0.6 },
+        { note: notes.E4, duration: 0.6 },
+        { note: notes.D4, duration: 1.2 }
+      ];
+      
+      let currentTime = audioContext.currentTime;
+      
+      melody.forEach(({ note, duration }) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(note, currentTime);
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0, currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + duration);
+        
+        oscillator.start(currentTime);
+        oscillator.stop(currentTime + duration);
+        
+        currentTime += duration;
+      });
+      
+      // Reset playing state after melody ends
+      setTimeout(() => {
+        setPlayingMusic(false);
+      }, currentTime * 1000);
+      
+    } catch (error) {
+      console.error('Error playing melody:', error);
+      setPlayingMusic(false);
+    }
+  };
 
   const blowCandle = () => {
     if (!candleBlown) {
       setCandleBlown(true);
       setShowConfetti(true);
       stopListening();
+      
+      // Play happy birthday melody
+      setTimeout(() => {
+        playHappyBirthdayMelody();
+      }, 500);
       
       // Show next button after confetti
       setTimeout(() => {
@@ -157,12 +235,22 @@ const CakePage = ({ onNext }: CakePageProps) => {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               
-              {/* Candle Flame Overlay */}
+              {/* Realistic Candle Flame */}
               {!candleBlown && (
                 <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2">
-                  <div className="relative">
-                    <div className="w-4 h-8 bg-gradient-to-t from-orange-400 to-yellow-300 rounded-full animate-pulse"></div>
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-6 h-10 bg-gradient-to-t from-orange-300/50 to-yellow-200/50 rounded-full animate-pulse blur-sm"></div>
+                  <div className="relative candle-flame">
+                    {/* Main flame */}
+                    <div className="flame-core"></div>
+                    {/* Inner flame */}
+                    <div className="flame-inner"></div>
+                    {/* Outer glow */}
+                    <div className="flame-glow"></div>
+                    {/* Flickering particles */}
+                    <div className="flame-particles">
+                      <div className="particle"></div>
+                      <div className="particle"></div>
+                      <div className="particle"></div>
+                    </div>
                   </div>
                 </div>
               )}
