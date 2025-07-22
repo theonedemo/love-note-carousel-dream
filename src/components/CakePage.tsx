@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowRight, Mic } from "lucide-react";
 import { Button } from "./ui/button";
 import cakeImage from "../assets/birthday-cake.jpg";
 
@@ -11,11 +11,17 @@ const CakePage = ({ onNext }: CakePageProps) => {
   const [candleBlown, setCandleBlown] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showNextButton, setShowNextButton] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const microphoneRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const blowCandle = () => {
     if (!candleBlown) {
       setCandleBlown(true);
       setShowConfetti(true);
+      stopListening();
       
       // Show next button after confetti
       setTimeout(() => {
@@ -23,6 +29,74 @@ const CakePage = ({ onNext }: CakePageProps) => {
       }, 1500);
     }
   };
+
+  const startListening = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
+      
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyserRef.current = analyser;
+      
+      const microphone = audioContext.createMediaStreamSource(stream);
+      microphoneRef.current = microphone;
+      microphone.connect(analyser);
+      
+      setIsListening(true);
+      detectBlowing();
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      // Fallback to click
+    }
+  };
+
+  const stopListening = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+    }
+    setIsListening(false);
+  };
+
+  const detectBlowing = () => {
+    if (!analyserRef.current || candleBlown) return;
+    
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+    
+    const checkSound = () => {
+      if (!analyserRef.current || candleBlown) return;
+      
+      analyserRef.current.getByteFrequencyData(dataArray);
+      
+      // Detect low frequency sounds (blowing typically has strong low frequencies)
+      const lowFreqSum = dataArray.slice(0, 10).reduce((sum, value) => sum + value, 0);
+      const avgLowFreq = lowFreqSum / 10;
+      
+      // Detect if there's a sustained low frequency sound (blowing)
+      if (avgLowFreq > 80) { // Threshold for blowing detection
+        blowCandle();
+        return;
+      }
+      
+      if (isListening) {
+        requestAnimationFrame(checkSound);
+      }
+    };
+    
+    checkSound();
+  };
+
+  useEffect(() => {
+    return () => {
+      stopListening();
+    };
+  }, []);
 
   // Generate confetti
   useEffect(() => {
@@ -103,10 +177,31 @@ const CakePage = ({ onNext }: CakePageProps) => {
               )}
             </div>
 
+            {/* Microphone Button */}
+            {!candleBlown && !isListening && (
+              <div className="mb-4">
+                <Button
+                  onClick={startListening}
+                  className="glow-button rounded-full px-6 py-3 mb-4"
+                >
+                  <Mic className="mr-2 h-5 w-5" />
+                  Start Listening for Blowing 🎤
+                </Button>
+              </div>
+            )}
+
+            {isListening && !candleBlown && (
+              <div className="mb-4 animate-pulse">
+                <p className="text-lg text-gradient font-semibold">
+                  🎤 Listening... Blow into your microphone! 💨
+                </p>
+              </div>
+            )}
+
             {/* Messages */}
             {!candleBlown ? (
               <p className="text-lg text-foreground/80">
-                Make a wish and blow out the candle! 🕯️✨
+                {!isListening ? "Start listening, then blow out the candle! 🕯️✨" : "Blow gently into your microphone! 💨"}
               </p>
             ) : (
               <div className="space-y-4 animate-fade-in">

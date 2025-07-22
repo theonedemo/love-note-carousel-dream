@@ -4,9 +4,13 @@ import { Button } from "./ui/button";
 
 const FinalMessage = () => {
   const [lightsOn, setLightsOn] = useState(false);
+  const [cardOpened, setCardOpened] = useState(false);
 
   const toggleLights = () => {
     setLightsOn(!lightsOn);
+    if (!lightsOn) {
+      setTimeout(() => setCardOpened(true), 500);
+    }
   };
 
   return (
@@ -68,38 +72,42 @@ const FinalMessage = () => {
           )}
         </div>
 
-        {/* Message Card */}
-        <div className={`romantic-card p-8 rounded-3xl max-w-2xl mx-auto transition-all duration-1000 ${
-          lightsOn ? 'bg-gradient-to-r from-yellow-50 to-pink-50 shadow-2xl' : ''
-        }`}>
-          {!lightsOn ? (
-            <div className="space-y-6">
-              <p className="text-xl md:text-2xl leading-relaxed text-foreground/90">
-                You bring light to every corner of my world 💖
-              </p>
-              <p className="text-lg text-foreground/80">
-                On this special day, I want to celebrate the incredible light you bring into my life every single day.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-6 animate-fade-in">
-              <p className="text-xl md:text-2xl leading-relaxed text-yellow-800">
-                ✨ Happy Birthday to my brightest star! ✨
-              </p>
-              <p className="text-lg text-pink-700">
-                Thank you for being the light that guides me, the warmth that comforts me, 
-                and the love that completes me. Here's to another year of making beautiful 
-                memories together! 🥂💕
-              </p>
-              <div className="text-2xl space-x-2">
-                <span>🎂</span>
-                <span>🎉</span>
-                <span>💖</span>
-                <span>✨</span>
-                <span>🌟</span>
+        {/* Greeting Card */}
+        <div className={`relative perspective-1000 max-w-2xl mx-auto transition-all duration-1000`}>
+          <div className={`greeting-card ${cardOpened ? 'opened' : ''} ${lightsOn ? 'lit' : ''}`}>
+            {/* Card Front */}
+            <div className="card-front romantic-card p-8 rounded-3xl">
+              <div className="space-y-6">
+                <p className="text-xl md:text-2xl leading-relaxed text-foreground/90">
+                  You bring light to every corner of my world 💖
+                </p>
+                <p className="text-lg text-foreground/80">
+                  On this special day, I want to celebrate the incredible light you bring into my life every single day.
+                </p>
               </div>
             </div>
-          )}
+            
+            {/* Card Inside */}
+            <div className="card-inside bg-gradient-to-r from-yellow-50 to-pink-50 p-8 rounded-3xl shadow-2xl">
+              <div className="space-y-6 animate-fade-in">
+                <p className="text-xl md:text-2xl leading-relaxed text-yellow-800">
+                  ✨ Happy Birthday to my brightest star! ✨
+                </p>
+                <p className="text-lg text-pink-700">
+                  Thank you for being the light that guides me, the warmth that comforts me, 
+                  and the love that completes me. Here's to another year of making beautiful 
+                  memories together! 🥂💕
+                </p>
+                <div className="text-2xl space-x-2">
+                  <span>🎂</span>
+                  <span>🎉</span>
+                  <span>💖</span>
+                  <span>✨</span>
+                  <span>🌟</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Light Switch Button */}
